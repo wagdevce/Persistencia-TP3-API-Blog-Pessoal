@@ -56,14 +56,43 @@ async def update_post(post_id: str, post_update: PostCreate):
     logger.info(f"Post ID {post_id} atualizado com sucesso.")
     return updated
 
-# As funções abaixo não precisam de alteração, pois não lidam diretamente
-# com a estrutura interna do autor ao serem chamadas.
+
+@router.post("/{post_id}/like", response_model=PostOut)
+async def like_post(post_id: str):
+    """
+    Incrementa o contador de likes de um post.
+    """
+    logger.debug(f"Adicionando like ao post ID {post_id}")
+    try:
+        oid = object_id(post_id)
+
+        # Usamos o operador $inc do MongoDB para incrementar o campo de forma atômica
+        result = await post_collection.find_one_and_update(
+            {"_id": oid},
+            {"$inc": {"likes": 1}},
+            return_document=True # Retorna o documento já atualizado
+        )
+
+        if not result:
+            logger.warning(f"Post com ID {post_id} não encontrado para dar like.")
+            raise HTTPException(status_code=404, detail="Post não encontrado")
+
+        result["_id"] = str(result["_id"])
+        logger.info(f"Like adicionado com sucesso ao post ID {post_id}. Total de likes: {result['likes']}")
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(f"Erro ao adicionar like ao post {post_id}: {e}")
+        raise HTTPException(status_code=500, detail="Erro interno ao adicionar like")
+
 @router.get("/", response_model=PaginatedPostResponse)
 async def list_posts(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1),
     publication_date: str = Query(None, description="Filtrar por data de publicação (formato: AAAA-MM-DD)"),
-    sort_by: str = Query("publication_date", description="Campo para ordenação"),
+    sort_by: str = Query("likes", description="Campo para ordenação (ex: likes, publication_date)"),
     order: str = Query("desc", regex="^(asc|desc)$", description="Ordem ascendente (asc) ou descendente (desc)")
 ):
     logger.debug(f"Listando posts com skip={skip}, limit={limit}")

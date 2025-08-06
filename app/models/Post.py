@@ -1,4 +1,3 @@
-# app/models/Post.py
 
 from datetime import datetime
 from typing import List, Optional
@@ -7,7 +6,7 @@ from bson import ObjectId
 
 from app.models.PyObjectId import PyObjectId
 
-# --- NOSSO NOVO MODELO EMBUTIDO ---
+
 class AuthorProfile(BaseModel):
     """
     Este é o nosso documento embutido (embedded document).
@@ -16,15 +15,16 @@ class AuthorProfile(BaseModel):
     name: str
     bio: Optional[str] = None
 
-# --- MODELO PRINCIPAL ATUALIZADO ---
+
 # Modelo base do Post
 class PostBase(BaseModel):
     title: str
     content: str
-    author: AuthorProfile  # <--- AQUI ESTÁ A MUDANÇA
+    author: AuthorProfile
     publication_date: datetime
     category_id: str
     tags_id: List[str] = []
+    likes: int = 0
 
     model_config = {
         "arbitrary_types_allowed": True,

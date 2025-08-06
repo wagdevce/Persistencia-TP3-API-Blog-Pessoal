@@ -154,7 +154,8 @@ async def seed_database():
             "author": random.choice(AUTHORS),
             "publication_date": fake.date_time_this_year(),
             "category_id": categories_map[template["category"]],
-            "tags_id": [str(id) for id in random.sample(list(tags_map.values()), k=random.randint(1, 3))]
+            "tags_id": [str(id) for id in random.sample(list(tags_map.values()), k=random.randint(1, 3))],
+            "likes": random.randint(0, 150)
         })
             
     post_result = await post_collection.insert_many(posts_data)
