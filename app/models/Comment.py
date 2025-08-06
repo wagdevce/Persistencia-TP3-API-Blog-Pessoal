@@ -14,6 +14,9 @@ class CommentBase(BaseModel):
     content: str
     creation_date: datetime = Field(default_factory=datetime.now)
 
+class CommentUpdate(BaseModel):
+    content: Optional[str] = None
+
 # Modelo para criar um novo comentário
 class CommentCreate(CommentBase):
     pass

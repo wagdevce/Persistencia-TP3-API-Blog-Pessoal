@@ -1,6 +1,7 @@
 
 from fastapi import APIRouter, HTTPException, status, Query
 from typing import List
+from bson import ObjectId
 
 # Adicionamos 'comment_collection' para a lógica de deleção
 from ..core.db import user_collection, comment_collection
@@ -49,16 +50,28 @@ async def list_users(skip: int = Query(0, ge=0), limit: int = Query(10, ge=1)):
 
 
 # --- NOVO ENDPOINT ---
-@router.get("/{user_id}", response_model=UserOut)
-async def get_user(user_id: str):
+@router.get("/{identifier}", response_model=UserOut)
+async def get_user(identifier: str):
     """
-    Busca um único usuário pelo seu ID.
+    Busca um único usuário pelo seu ID ou pelo seu username (exato, case-insensitive).
     """
-    user = await user_collection.find_one({"_id": object_id(user_id)})
-    if user:
-        return user
-    raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    logger.debug(f"Buscando usuário com o identificador: {identifier}")
+    
+    # Verifica se o identificador é um ObjectId válido
+    if ObjectId.is_valid(identifier):
+        query = {"_id": ObjectId(identifier)}
+    else:
+        # Se não for um ID, busca por username (exato e case-insensitive)
+        query = {"username": {"$regex": f"^{identifier}$", "$options": "i"}}
 
+    user = await user_collection.find_one(query)
+    
+    if user:
+        logger.info(f"Usuário encontrado com o identificador '{identifier}'.")
+        return user
+        
+    logger.warning(f"Usuário com o identificador '{identifier}' não encontrado.")
+    raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
 # --- NOVO ENDPOINT ---
 @router.put("/{user_id}", response_model=UserOut)

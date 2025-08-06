@@ -1,20 +1,23 @@
-# app/routers/CategoryRouter.py
 
 from fastapi import APIRouter, HTTPException, Query, status
 from typing import List
+from bson import ObjectId
 
-# Importando nossos novos modelos
 from app.models import CategoryOut, CategoryCreate, PaginatedCategoryResponse, PostOut
-
-# Precisaremos definir estas coleções no nosso arquivo de DB
 from app.core.db import category_collection, post_collection
 from ..logs.logger import logger
-from .utils import object_id # Importando a função utilitária
+from .utils import object_id
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
 
-@router.post("/", response_model=CategoryOut, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=CategoryOut, status_code=status.HTTP_201_CREATED, summary="Criar uma Nova Categoria")
 async def create_category(category: CategoryCreate):
+    """
+    Cria uma nova categoria no banco de dados.
+
+    - **name**: O nome da categoria (obrigatório).
+    - **description**: Uma breve descrição sobre a categoria (opcional).
+    """
     logger.debug(f"Tentando criar categoria: {category}")
     try:
         category_dict = category.model_dump()
@@ -28,8 +31,11 @@ async def create_category(category: CategoryCreate):
         logger.exception(f"Erro ao criar categoria: {str(e)}")
         raise HTTPException(status_code=500, detail="Erro interno ao criar categoria")
 
-@router.get("/", response_model=PaginatedCategoryResponse)
+@router.get("/", response_model=PaginatedCategoryResponse, summary="Listar Todas as Categorias")
 async def list_categories(skip: int = Query(0, ge=0), limit: int = Query(10, ge=1)):
+    """
+    Retorna uma lista paginada de todas as categorias cadastradas no sistema.
+    """
     logger.debug(f"Listando categorias com skip={skip}, limit={limit}")
     try:
         total = await category_collection.count_documents({})
@@ -49,27 +55,11 @@ async def list_categories(skip: int = Query(0, ge=0), limit: int = Query(10, ge=
         logger.exception("Erro ao listar categorias: " + str(e))
         raise HTTPException(status_code=500, detail="Erro interno ao listar categorias")
 
-@router.get("/{category_id}", response_model=CategoryOut)
-async def get_category(category_id: str):
-    logger.debug(f"Buscando categoria com ID {category_id}")
-    try:
-        oid = object_id(category_id)
-        category = await category_collection.find_one({"_id": oid})
-        
-        if not category:
-            logger.warning(f"Categoria ID {category_id} não encontrada")
-            raise HTTPException(status_code=404, detail="Categoria não encontrada")
-            
-        category["_id"] = str(category["_id"])
-        return category
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception(f"Erro ao buscar categoria ID {category_id}: " + str(e))
-        raise HTTPException(status_code=500, detail="Erro interno ao buscar categoria")
-
-@router.get("/count", response_model=dict)
+@router.get("/count", response_model=dict, summary="Contar Total de Categorias")
 async def count_categories():
+    """
+    Retorna a quantidade total de categorias cadastradas.
+    """
     try:
         count = await category_collection.count_documents({})
         logger.info(f"Total de categorias: {count}")
@@ -78,8 +68,39 @@ async def count_categories():
         logger.exception("Erro ao contar categorias: " + str(e))
         raise HTTPException(status_code=500, detail="Erro interno ao contar categorias")
 
-@router.put("/{category_id}", response_model=CategoryOut)
+@router.get("/{identifier}", response_model=CategoryOut, summary="Buscar Categoria por ID ou Nome")
+async def get_category(identifier: str):
+    """
+    Busca uma única categoria no banco de dados.
+
+    A busca pode ser feita de duas formas:
+    - Pelo **ID** da categoria (ex: `689efb3f24f2c56fb436b16a`).
+    - Pelo **nome exato** da categoria (ex: `Tecnologia`).
+
+    A busca por nome não diferencia maiúsculas de minúsculas.
+    """
+    logger.debug(f"Buscando categoria com o identificador: {identifier}")
+    
+    if ObjectId.is_valid(identifier):
+        query = {"_id": ObjectId(identifier)}
+    else:
+        query = {"name": {"$regex": f"^{identifier}$", "$options": "i"}}
+
+    category = await category_collection.find_one(query)
+    
+    if category:
+        logger.info(f"Categoria encontrada com o identificador '{identifier}'.")
+        category["_id"] = str(category["_id"])
+        return category
+        
+    logger.warning(f"Categoria com o identificador '{identifier}' não encontrada.")
+    raise HTTPException(status_code=404, detail="Categoria não encontrada")
+
+@router.put("/{category_id}", response_model=CategoryOut, summary="Atualizar uma Categoria")
 async def update_category(category_id: str, update_data: CategoryCreate):
+    """
+    Atualiza os dados de uma categoria existente, buscando-a pelo seu ID.
+    """
     logger.debug(f"Atualizando categoria ID {category_id}")
     try:
         oid = object_id(category_id)
@@ -100,21 +121,23 @@ async def update_category(category_id: str, update_data: CategoryCreate):
         logger.exception(f"Erro ao atualizar categoria ID {category_id}: " + str(e))
         raise HTTPException(status_code=500, detail="Erro interno ao atualizar categoria")
 
-@router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Deletar uma Categoria")
 async def delete_category(category_id: str):
+    """
+    Deleta uma categoria do banco de dados pelo seu ID.
+
+    Ao deletar uma categoria, todos os posts que pertenciam a ela terão seu campo `category_id` definido como nulo.
+    """
     logger.debug(f"Tentando deletar categoria ID {category_id}")
     try:
         oid = object_id(category_id)
 
-        # Atualiza os posts, definindo category_id como null
-        # Uma alternativa seria mover para uma categoria "Geral"
         result_update = await post_collection.update_many(
             {"category_id": category_id},
             {"$set": {"category_id": None}}
         )
         logger.info(f"{result_update.modified_count} posts tiveram o campo category_id removido")
 
-        # Deleta a categoria
         result_delete = await category_collection.delete_one({"_id": oid})
         if result_delete.deleted_count == 0:
             logger.warning(f"Categoria ID {category_id} não encontrada para deleção")
@@ -129,17 +152,19 @@ async def delete_category(category_id: str):
         logger.exception(f"Erro ao deletar categoria ID {category_id}: " + str(e))
         raise HTTPException(status_code=500, detail="Erro interno ao deletar categoria")
 
-@router.get("/{category_id}/posts", response_model=List[PostOut])
+@router.get("/{category_id}/posts", response_model=List[PostOut], summary="Listar Posts de uma Categoria")
 async def get_posts_by_category(category_id: str):
+    """
+    Retorna uma lista de todos os posts que pertencem a uma categoria específica,
+    identificada pelo seu ID.
+    """
     logger.debug(f"Buscando posts na categoria {category_id}")
     try:
-        # Verifica se a categoria existe
         oid = object_id(category_id)
         category = await category_collection.find_one({"_id": oid})
         if not category:
             raise HTTPException(status_code=404, detail="Categoria não encontrada")
 
-        # Busca os posts
         posts = await post_collection.find({"category_id": category_id}).to_list(length=None)
 
         for post in posts:
@@ -153,4 +178,3 @@ async def get_posts_by_category(category_id: str):
     except Exception as e:
         logger.exception(f"Erro ao buscar posts por categoria {category_id}: " + str(e))
         raise HTTPException(status_code=500, detail="Erro ao buscar posts por categoria")
-    
