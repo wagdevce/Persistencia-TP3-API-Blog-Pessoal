@@ -18,7 +18,7 @@ from app.core.db import (
 
 fake = Faker('pt_BR')
 
-# --- lista de conteudo ---
+# --- LISTAS DE CONTEÚDO ---
 CATEGORIES = [
     {"name": "Tecnologia", "description": "Artigos sobre desenvolvimento, gadgets e o futuro da tecnologia."},
     {"name": "Viagens", "description": "Guias e dicas para suas próximas aventuras."},
@@ -128,7 +128,7 @@ COMMENT_TEMPLATES = [
 ]
 
 async def seed_database():
-    print("Iniciando o povoamento (versão com likes aleatórios)...")
+    print("Iniciando o povoamento robusto do banco de dados...")
 
     # --- Limpando coleções ---
     print("Limpando coleções...")
@@ -140,8 +140,8 @@ async def seed_database():
     )
 
     # --- 1. Criando Usuários ---
-    print("Criando 10 usuários de exemplo...")
-    users_data = [{"username": fake.user_name(), "email": fake.email(), "password": "password123", "creation_date": fake.date_time_this_year()} for _ in range(10)]
+    print("Criando 20 usuários de exemplo...")
+    users_data = [{"username": fake.user_name(), "email": fake.email(), "password": "password123", "creation_date": fake.date_time_this_year()} for _ in range(20)]
     user_result = await user_collection.insert_many(users_data)
     user_ids = [str(id) for id in user_result.inserted_ids]
     print(f"{len(user_ids)} usuários criados.")
@@ -155,7 +155,9 @@ async def seed_database():
     print("Categorias e Tags criadas.")
 
     # --- 3. Criando Posts ---
-    all_templates = POST_TEMPLATES * 2 
+    # Para ter mais variedade, vamos usar cada template de post 3 ou 4 vezes.
+    all_templates = (POST_TEMPLATES * 3) + random.sample(POST_TEMPLATES, k=4)
+    random.shuffle(all_templates)
     print(f"Criando {len(all_templates)} posts temáticos...")
     posts_data = []
     for template in all_templates:
@@ -163,17 +165,17 @@ async def seed_database():
             "title": template["title"], "content": template["content"],
             "author": random.choice(AUTHORS), "publication_date": fake.date_time_this_year(),
             "category_id": categories_map[template["category"]],
-            "tags_id": [str(id) for id in random.sample(list(tags_map.values()), k=random.randint(1, 3))],
+            "tags_id": [str(id) for id in random.sample(list(tags_map.values()), k=random.randint(1, 4))],
             "likes": 0
         })
     post_result = await post_collection.insert_many(posts_data)
     post_ids = [str(id) for id in post_result.inserted_ids]
-    print("Posts criados.")
+    print(f"{len(post_ids)} posts criados.")
     
     # --- 4. Criando Comentários ---
-    print("Criando 150 comentários realistas...")
+    print("Criando 250 comentários realistas...")
     comments_data = []
-    for _ in range(150):
+    for _ in range(250):
         comments_data.append({
             "post_id": random.choice(post_ids), "user_id": random.choice(user_ids),
             "content": random.choice(COMMENT_TEMPLATES), "creation_date": fake.date_time_this_year()
@@ -181,16 +183,14 @@ async def seed_database():
     await comment_collection.insert_many(comments_data)
     print("Comentários criados.")
 
-    # --- 5. Criando Likes  ---
+    # --- 5. Criando Likes ---
     print("Criando likes aleatórios de forma eficiente...")
     
     all_possible_likes = [(post_id, user_id) for post_id in post_ids for user_id in user_ids]
     random.shuffle(all_possible_likes)
     
-   
     max_likes = len(all_possible_likes)
-    num_likes_to_create = random.randint(int(max_likes * 0.4), int(max_likes * 0.8))
-    
+    num_likes_to_create = random.randint(int(max_likes * 0.5), int(max_likes * 0.9))
     
     selected_likes = all_possible_likes[:num_likes_to_create]
     
@@ -217,7 +217,7 @@ async def seed_database():
         )
 
     print(f"{len(likes_data)} likes criados e contadores atualizados.")
-    print("\nBanco de dados final populado com sucesso!")
+    print("\nBanco de dados robusto populado com sucesso!")
 
 
 if __name__ == "__main__":

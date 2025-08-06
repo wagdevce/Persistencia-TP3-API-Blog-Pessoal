@@ -9,3 +9,21 @@
 2025-08-06 13:10:11,599 - INFO - 10 posts encontrados
 2025-08-06 13:10:30,842 - INFO - 26 posts encontrados
 2025-08-06 13:13:46,880 - INFO - 26 posts encontrados
+2025-08-06 19:54:14,556 - INFO - Usuário criado com sucesso: string
+2025-08-06 20:04:49,829 - INFO - Usuário encontrado com o identificador 'beatriz19'.
+2025-08-06 20:05:08,035 - INFO - Usuário encontrado com o identificador '68937f26a396504d7e318e39'.
+2025-08-06 20:06:00,385 - INFO - 5 categorias encontradas
+2025-08-06 20:06:55,184 - WARNING - ID inválido fornecido: count
+2025-08-06 20:07:15,438 - WARNING - ID inválido fornecido: Esporte
+2025-08-06 20:07:20,527 - WARNING - ID inválido fornecido: Esportes
+2025-08-06 20:07:27,183 - WARNING - ID inválido fornecido: Tecnologia
+2025-08-06 20:07:40,979 - INFO - 5 categorias encontradas
+2025-08-06 20:07:55,219 - INFO - 6 posts encontrados na categoria 68937f26a396504d7e318e43
+2025-08-06 20:10:38,145 - INFO - 5 categorias encontradas
+2025-08-06 20:11:00,934 - INFO - Categoria encontrada com o identificador 'Tecnologia'.
+2025-08-06 20:11:11,029 - INFO - Categoria encontrada com o identificador '68937f26a396504d7e318e43'.
+2025-08-06 20:11:24,409 - WARNING - Categoria com o identificador 'count' não encontrada.
+2025-08-06 20:12:26,762 - WARNING - Categoria com o identificador 'count' não encontrada.
+2025-08-06 20:12:27,666 - WARNING - Categoria com o identificador 'count' não encontrada.
+2025-08-06 20:13:15,411 - WARNING - Categoria com o identificador 'count' não encontrada.
+2025-08-06 20:15:38,583 - INFO - Total de categorias: 5
