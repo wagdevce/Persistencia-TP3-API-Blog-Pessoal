@@ -22,7 +22,7 @@ from app.routers.UserRouter import router as UserRouter
 app = FastAPI(
     title="Blog API",
     description="API para um sistema de gerenciamento de conteúdo de um blog.",
-    version="1.2.0"
+    version="1.2.1"
 )
 
 # --- INÍCIO DO CÓDIGO PARA CRIAR ÍNDICES ---
