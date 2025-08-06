@@ -65,8 +65,8 @@ Este projeto consiste em uma **API RESTful** para gerenciamento de um **Sistema 
 
 1.  **Clone o repositório**:
     ```bash
-    git clone [https://github.com/seuusuario/blog-api.git](https://github.com/seuusuario/blog-api.git)
-    cd blog-api
+    git clone [https://github.com/wagdevce/Persistencia-TP3-API-Blog-Pessoal.git](https://github.com/wagdevce/Persistencia-TP3-API-Blog-Pessoal.git)
+    cd Persistencia-TP3-API-Blog-Pessoal
     ```
 
 2.  **Crie e ative um ambiente virtual** (Recomendado):
