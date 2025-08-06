@@ -1,11 +1,12 @@
-# app/routers/CommentRouter.py
 
 from fastapi import APIRouter, HTTPException, Query, status
 from typing import List
 
-# Nossos novos modelos e coleções
-from app.models import CommentOut, CommentCreate, PaginatedCommentResponse
-from app.core.db import comment_collection, post_collection
+# modelos e coleções
+from app.models import CommentOut, CommentCreate
+# Importamos PaginatedUserResponse apenas para o tipo de retorno
+from app.models.Comment import PaginatedCommentResponse 
+from ..core.db import comment_collection, post_collection, user_collection # <-- Adicionamos user_collection
 from ..logs.logger import logger
 from .utils import object_id
 
@@ -18,15 +19,20 @@ async def create_comment(comment: CommentCreate):
         # Valida se o post referenciado existe
         post = await post_collection.find_one({"_id": object_id(comment.post_id)})
         if not post:
-            logger.warning(f"Post com ID {comment.post_id} não encontrado ao tentar criar comentário.")
+            logger.warning(f"Post com ID {comment.post_id} não encontrado.")
             raise HTTPException(status_code=404, detail="Post não encontrado para associar o comentário.")
+        # Valida se o usuário referenciado existe
+        user = await user_collection.find_one({"_id": object_id(comment.user_id)})
+        if not user:
+            logger.warning(f"Usuário com ID {comment.user_id} não encontrado.")
+            raise HTTPException(status_code=404, detail="Usuário não encontrado para criar o comentário.")
 
         new_comment_dict = comment.model_dump()
         result = await comment_collection.insert_one(new_comment_dict)
         created = await comment_collection.find_one({"_id": result.inserted_id})
 
         created["_id"] = str(created["_id"])
-        logger.info(f"Comentário criado com sucesso: {created}")
+        logger.info(f"Comentário criado com sucesso por usuário {comment.user_id}")
         return created
 
     except HTTPException:

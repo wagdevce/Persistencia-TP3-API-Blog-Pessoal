@@ -16,3 +16,4 @@ category_collection = database["categories"]
 tag_collection = database["tags"]
 comment_collection = database["comments"]
 post_tag_collection = database["post_tags"] # Para a associação N:N
+user_collection = database["users"]

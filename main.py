@@ -1,4 +1,3 @@
-# main.py (na pasta raiz do projeto)
 
 import uvicorn
 from fastapi import FastAPI
@@ -17,11 +16,13 @@ from app.routers.TagRouter import router as TagRouter
 from app.routers.CommentRouter import router as CommentRouter
 from app.routers.PostTagRouter import router as PostTagRouter
 from app.routers.DashboardRouter import router as DashboardRouter
+from app.routers.UserRouter import router as UserRouter
+
 
 app = FastAPI(
     title="Blog API",
     description="API para um sistema de gerenciamento de conteúdo de um blog.",
-    version="1.0.0"
+    version="1.2.0"
 )
 
 # --- INÍCIO DO CÓDIGO PARA CRIAR ÍNDICES ---
@@ -40,16 +41,18 @@ async def create_indexes():
 
     # Índice para ordenar posts por data de publicação
     await post_collection.create_index([("publication_date", DESCENDING)])
-# --- FIM DO CÓDIGO PARA CRIAR ÍNDICES ---
+
 
 
 # Incluindo os novos routers na aplicação FastAPI
+app.include_router(UserRouter)
 app.include_router(CategoryRouter)
 app.include_router(PostRouter)
 app.include_router(TagRouter)
 app.include_router(CommentRouter)
 app.include_router(PostTagRouter)
 app.include_router(DashboardRouter)
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

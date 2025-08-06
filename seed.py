@@ -1,4 +1,3 @@
-# seed.py
 
 import asyncio
 import random
@@ -12,34 +11,27 @@ from app.core.db import (
     post_collection,
     comment_collection,
     post_tag_collection,
+    user_collection 
 )
 
-# Inicializa o Faker para gerar dados de apoio em português do Brasil
 fake = Faker('pt_BR')
 
-# --- CONTEÚDO PRÉ-DEFINIDO E COERENTE (VERSÃO FINAL E EXPANDIDA) ---
+# --- DADOS PRÉ-DEFINIDOS ---
 
 CATEGORIES = [
     {"name": "Tecnologia", "description": "Artigos sobre desenvolvimento, gadgets e o futuro da tecnologia."},
-    {"name": "Viagens", "description": "Guias, dicas e histórias sobre destinos incríveis."},
+    {"name": "Viagens", "description": "Guias e dicas para suas próximas aventuras."},
     {"name": "Culinária", "description": "Receitas e segredos da gastronomia mundial."},
     {"name": "Esportes", "description": "Análises, notícias e histórias do mundo esportivo."},
     {"name": "Música", "description": "Críticas, lançamentos e a história por trás das canções."}
 ]
-
 TAGS = [
-    # Tecnologia
     {"name": "Python"}, {"name": "FastAPI"}, {"name": "MongoDB"}, {"name": "Docker"},
-    # Viagens
     {"name": "Europa"}, {"name": "Praia"}, {"name": "Aventura"},
-    # Culinária
     {"name": "Sobremesa"}, {"name": "Massa"}, {"name": "Vegano"},
-    # Esportes
     {"name": "Futebol"}, {"name": "Basquete"}, {"name": "Fórmula 1"},
-    # Música
     {"name": "Rock"}, {"name": "Pop"}, {"name": "MPB"}
 ]
-
 AUTHORS = [
     {"name": "Ana Coder", "bio": "Desenvolvedora Python e entusiasta de novas tecnologias."},
     {"name": "Bernardo Viajante", "bio": "Explorador de culturas e paisagens."},
@@ -47,9 +39,8 @@ AUTHORS = [
     {"name": "Daniel Esportivo", "bio": "Jornalista e analista esportivo."},
     {"name": "Elena Melodia", "bio": "Crítica musical e historiadora do rock."}
 ]
-
 POST_TEMPLATES = [
-    # Tecnologia
+    # ... (a lista gigante de posts que já temos) ...
     {
         "category": "Tecnologia",
         "title": "Primeiros Passos com FastAPI e MongoDB",
@@ -65,7 +56,6 @@ POST_TEMPLATES = [
         "title": "Deploy de Aplicações FastAPI com Docker",
         "content": "Levar sua aplicação para produção é um passo crucial. Neste tutorial, veremos como containerizar uma API FastAPI usando Docker, garantindo um ambiente consistente e facilitando o deploy em qualquer provedor de nuvem."
     },
-    # Viagens
     {
         "category": "Viagens",
         "title": "Um Roteiro de 7 Dias pela Costa Amalfitana",
@@ -76,7 +66,6 @@ POST_TEMPLATES = [
         "title": "As Maravilhas Escondidas da Serra Gaúcha",
         "content": "Além de Gramado e Canela, a Serra Gaúcha esconde vales, vinícolas e cidades encantadoras. Explore o Vale dos Vinhedos, conheça a história da imigração italiana e descubra paisagens de tirar o fôlego."
     },
-    # Culinária
     {
         "category": "Culinária",
         "title": "O Segredo do Risoto Perfeito: Dicas de um Chef",
@@ -87,7 +76,6 @@ POST_TEMPLATES = [
         "title": "Como Fazer Massa Fresca em Casa: Guia para Iniciantes",
         "content": "Nada se compara ao sabor de uma massa fresca feita em casa. Com este guia passo a passo, você vai aprender a fazer a massa básica com ovos e a transformá-la em pratos como tagliatelle, ravioli e lasanha."
     },
-    # Esportes
     {
         "category": "Esportes",
         "title": "Análise Tática: A Evolução do Meio-Campo Moderno",
@@ -103,7 +91,6 @@ POST_TEMPLATES = [
         "title": "NBA: Como as Estatísticas Avançadas Mudaram o Jogo",
         "content": "O basquete vai muito além de pontos e rebotes. Entenda como métricas como 'Player Efficiency Rating' (PER) e 'True Shooting Percentage' (TS%) revolucionaram a forma como jogadores e equipes são avaliados."
     },
-    # Música
     {
         "category": "Música",
         "title": "A História por Trás do 'The Dark Side of the Moon'",
@@ -121,61 +108,70 @@ POST_TEMPLATES = [
     }
 ]
 
-async def seed_database():
-    print("Iniciando o povoamento TEMÁTICO (versão final) do banco de dados...")
 
-    # --- Limpando coleções antigas ---
+async def seed_database():
+    print("Iniciando o povoamento com USUÁRIOS...")
+
+    # --- Limpando coleções ---
     print("Limpando coleções...")
     await asyncio.gather(
         category_collection.delete_many({}), tag_collection.delete_many({}),
         post_collection.delete_many({}), comment_collection.delete_many({}),
-        post_tag_collection.delete_many({})
+        post_tag_collection.delete_many({}), user_collection.delete_many({}) # <-- Limpa usuários
     )
 
-    # --- 1. Criando Categorias e Tags ---
+    # --- 1. Criando Usuários ---
+    print("Criando 10 usuários de exemplo...")
+    users_data = []
+    for _ in range(10):
+        users_data.append({
+            "username": fake.user_name(),
+            "email": fake.email(),
+            "password": "password123", # Em um app real, isso seria hasheado
+            "creation_date": fake.date_time_this_year()
+        })
+    user_result = await user_collection.insert_many(users_data)
+    user_ids = [str(id) for id in user_result.inserted_ids]
+    print(f"{len(user_ids)} usuários criados.")
+
+    # --- 2. Criando Categorias e Tags ---
     print("Criando categorias e tags...")
     category_result = await category_collection.insert_many(CATEGORIES)
     tag_result = await tag_collection.insert_many(TAGS)
-    
     categories_map = {cat['name']: str(cat_id) for cat, cat_id in zip(CATEGORIES, category_result.inserted_ids)}
     tags_map = {tag['name']: str(tag_id) for tag, tag_id in zip(TAGS, tag_result.inserted_ids)}
-    
     print("Categorias e Tags criadas.")
 
-    # --- 2. Criando Posts a partir dos Modelos ---
-    # Vamos duplicar os posts para ter mais volume
-    all_templates = POST_TEMPLATES * 2 
+    # --- 3. Criando Posts ---
+    all_templates = POST_TEMPLATES * 2
     print(f"Criando {len(all_templates)} posts temáticos...")
     posts_data = []
     for template in all_templates:
         posts_data.append({
-            "title": template["title"],
-            "content": template["content"],
-            "author": random.choice(AUTHORS),
-            "publication_date": fake.date_time_this_year(),
+            "title": template["title"], "content": template["content"],
+            "author": random.choice(AUTHORS), "publication_date": fake.date_time_this_year(),
             "category_id": categories_map[template["category"]],
             "tags_id": [str(id) for id in random.sample(list(tags_map.values()), k=random.randint(1, 3))],
             "likes": random.randint(0, 150)
         })
-            
     post_result = await post_collection.insert_many(posts_data)
     post_ids = [str(id) for id in post_result.inserted_ids]
     print("Posts criados.")
     
-    # --- 3. Criando Comentários ---
+    # --- 4. Criando Comentários (associados a usuários reais) ---
     print("Criando 150 comentários...")
     comments_data = []
     for _ in range(150):
         comments_data.append({
             "post_id": random.choice(post_ids),
-            "author_name": fake.name(),
+            "user_id": random.choice(user_ids), 
             "content": fake.sentence(nb_words=random.randint(5, 15)),
             "creation_date": fake.date_time_this_year()
         })
     await comment_collection.insert_many(comments_data)
     print("Comentários criados.")
 
-    print("\nBanco de dados final populado com sucesso!")
+    print("\nBanco de dados final populado com usuários!")
 
 
 if __name__ == "__main__":
