@@ -10,6 +10,11 @@ class UserBase(BaseModel):
     email: str
     creation_date: datetime = Field(default_factory=datetime.now)
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None    
+
 class UserCreate(UserBase):
     password: str
 

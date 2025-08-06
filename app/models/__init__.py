@@ -5,7 +5,8 @@ from .Post import PostBase, PostCreate, PostOut, PaginatedPostResponse, AuthorPr
 from .Tag import TagBase, TagCreate, TagOut, PaginatedTagResponse
 from .Comment import CommentBase, CommentCreate, CommentOut, PaginatedCommentResponse
 from .PostTag import PostTagBase, PostTagCreate, PostTagOut, PaginatedPostTagResponse
-from .User import UserBase, UserCreate, UserOut, PaginatedUserResponse # <-- ADICIONAMOS ESTA LINHA
+from .User import UserBase, UserCreate, UserOut, PaginatedUserResponse ,UserUpdate
+from .PostLike import PostLikeBase, PostLikeCreate, PostLikeOut
 
 __all__ = [
     "CategoryBase", "CategoryCreate", "CategoryOut", "PaginatedCategoryResponse",
@@ -13,5 +14,6 @@ __all__ = [
     "TagBase", "TagCreate", "TagOut", "PaginatedTagResponse",
     "CommentBase", "CommentCreate", "CommentOut", "PaginatedCommentResponse",
     "PostTagBase", "PostTagCreate", "PostTagOut", "PaginatedPostTagResponse",
-    "UserBase", "UserCreate", "UserOut", "PaginatedUserResponse", # <-- E ADICIONAMOS ESTA
+    "UserBase", "UserCreate", "UserOut", "PaginatedUserResponse", "UserUpdate",
+    "PostLikeBase", "PostLikeCreate", "PostLikeOut"
 ]
