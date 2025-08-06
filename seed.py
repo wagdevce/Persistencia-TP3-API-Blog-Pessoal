@@ -1,4 +1,3 @@
-# seed.py
 
 import asyncio
 import random
@@ -19,7 +18,7 @@ from app.core.db import (
 
 fake = Faker('pt_BR')
 
-# --- LISTAS DE CONTEÚDO (sem alterações) ---
+# --- lista de conteudo ---
 CATEGORIES = [
     {"name": "Tecnologia", "description": "Artigos sobre desenvolvimento, gadgets e o futuro da tecnologia."},
     {"name": "Viagens", "description": "Guias e dicas para suas próximas aventuras."},
@@ -182,18 +181,16 @@ async def seed_database():
     await comment_collection.insert_many(comments_data)
     print("Comentários criados.")
 
-    # --- 5. Criando Likes (MÉTODO OTIMIZADO E ALEATÓRIO) ---
+    # --- 5. Criando Likes  ---
     print("Criando likes aleatórios de forma eficiente...")
     
     all_possible_likes = [(post_id, user_id) for post_id in post_ids for user_id in user_ids]
     random.shuffle(all_possible_likes)
     
-    # --- AQUI ESTÁ A CORREÇÃO ---
-    # Em vez de um número fixo, pegamos um número aleatório de likes para criar.
-    # Por exemplo, entre 40% e 80% do total de combinações possíveis.
+   
     max_likes = len(all_possible_likes)
     num_likes_to_create = random.randint(int(max_likes * 0.4), int(max_likes * 0.8))
-    # --- FIM DA CORREÇÃO ---
+    
     
     selected_likes = all_possible_likes[:num_likes_to_create]
     
