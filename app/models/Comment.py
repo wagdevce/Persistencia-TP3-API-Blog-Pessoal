@@ -10,7 +10,7 @@ from app.models.PyObjectId import PyObjectId
 # Modelo base do Comentário
 class CommentBase(BaseModel):
     post_id: str  # ID do post ao qual o comentário pertence
-    author_name: str
+    user_id: str 
     content: str
     creation_date: datetime = Field(default_factory=datetime.now)
 

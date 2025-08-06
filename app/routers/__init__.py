@@ -6,6 +6,7 @@ from .TagRouter import router as TagRouter
 from .CommentRouter import router as CommentRouter
 from .PostTagRouter import router as PostTagRouter
 from .DashboardRouter import router as DashboardRouter
+from .UserRouter import router as UserRouter
 
 __all__ = [
     "CategoryRouter",
@@ -14,4 +15,5 @@ __all__ = [
     "CommentRouter",
     "PostTagRouter",
     "DashboardRouter",
+    "UserRouter",
 ]

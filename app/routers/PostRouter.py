@@ -5,8 +5,8 @@ from fastapi import APIRouter, HTTPException, Query, status
 from typing import Any, Dict, List
 
 # Nossos modelos e coleções
-from app.models import PostCreate, PostOut, PaginatedPostResponse
-from ..core.db import post_collection, tag_collection, category_collection, comment_collection, post_tag_collection
+from app.models import PostCreate, PostOut, PaginatedPostResponse, PopularPostOut, PaginatedPopularPostResponse
+from ..core.db import post_collection, tag_collection, category_collection, comment_collection, post_tag_collection, post_like_collection, user_collection
 from ..logs.logger import logger
 from .utils import object_id
 
@@ -57,35 +57,64 @@ async def update_post(post_id: str, post_update: PostCreate):
     return updated
 
 
-@router.post("/{post_id}/like", response_model=PostOut)
-async def like_post(post_id: str):
+@router.post("/{post_id}/like/{user_id}", response_model=PostOut)
+async def like_post(post_id: str, user_id: str):
     """
-    Incrementa o contador de likes de um post.
+    Registra um like de um usuário específico em um post.
+    Impede likes duplicados.
     """
-    logger.debug(f"Adicionando like ao post ID {post_id}")
-    try:
-        oid = object_id(post_id)
+    logger.debug(f"Usuário {user_id} tentando curtir o post {post_id}")
+    oid_post = object_id(post_id)
+    oid_user = object_id(user_id)
 
-        # Usamos o operador $inc do MongoDB para incrementar o campo de forma atômica
-        result = await post_collection.find_one_and_update(
-            {"_id": oid},
-            {"$inc": {"likes": 1}},
-            return_document=True # Retorna o documento já atualizado
-        )
+    # Validar se o post e o usuário existem
+    if not await post_collection.find_one({"_id": oid_post}):
+        raise HTTPException(status_code=404, detail="Post não encontrado")
+    if not await user_collection.find_one({"_id": oid_user}):
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-        if not result:
-            logger.warning(f"Post com ID {post_id} não encontrado para dar like.")
-            raise HTTPException(status_code=404, detail="Post não encontrado")
+    # Verificar se este usuário já curtiu este post
+    existing_like = await post_like_collection.find_one({"post_id": post_id, "user_id": user_id})
+    if existing_like:
+        raise HTTPException(status_code=409, detail="Você já curtiu este post.")
 
-        result["_id"] = str(result["_id"])
-        logger.info(f"Like adicionado com sucesso ao post ID {post_id}. Total de likes: {result['likes']}")
-        return result
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception(f"Erro ao adicionar like ao post {post_id}: {e}")
-        raise HTTPException(status_code=500, detail="Erro interno ao adicionar like")
+    # Se não curtiu, cria o registro do like e incrementa o contador no post
+    like_document = {"post_id": post_id, "user_id": user_id, "created_at": datetime.now()}
+    await post_like_collection.insert_one(like_document)
+    
+    updated_post = await post_collection.find_one_and_update(
+        {"_id": oid_post},
+        {"$inc": {"likes": 1}},
+        return_document=True
+    )
+    
+    logger.info(f"Like do usuário {user_id} registrado com sucesso no post {post_id}.")
+    return updated_post
+
+@router.delete("/{post_id}/like/{user_id}", response_model=PostOut)
+async def dislike_post(post_id: str, user_id: str):
+    """
+    Remove um like de um usuário específico em um post.
+    """
+    logger.debug(f"Usuário {user_id} tentando descurtir o post {post_id}")
+    oid_post = object_id(post_id)
+
+    # Tenta deletar o registro do like
+    delete_result = await post_like_collection.delete_one({"post_id": post_id, "user_id": user_id})
+
+    # Se nada foi deletado, significa que o usuário não tinha curtido
+    if delete_result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Você não curtiu este post para poder descurtir.")
+
+    # Se o like foi removido, decrementa o contador no post
+    updated_post = await post_collection.find_one_and_update(
+        {"_id": oid_post},
+        {"$inc": {"likes": -1}},
+        return_document=True
+    )
+
+    logger.info(f"Like do usuário {user_id} removido com sucesso do post {post_id}.")
+    return updated_post
 
 @router.get("/", response_model=PaginatedPostResponse)
 async def list_posts(

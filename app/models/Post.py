@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from bson import ObjectId
-
+from pydantic import BaseModel
 from app.models.PyObjectId import PyObjectId
 
 
@@ -52,3 +52,14 @@ class PaginatedPostResponse(BaseModel):
     skip: int
     limit: int
     data: List[PostOut]
+
+class PopularPostOut(PostOut):
+    """
+    Modelo de saída para posts populares, incluindo campos calculados.
+    """
+    comment_count: int
+    popularity_score: float
+
+class PaginatedPopularPostResponse(BaseModel):
+    total: int
+    data: List[PopularPostOut]    
