@@ -16,7 +16,7 @@ class AuthorProfile(BaseModel):
     bio: Optional[str] = None
 
 
-# Modelo base do Post
+
 class PostBase(BaseModel):
     title: str
     content: str
@@ -32,11 +32,10 @@ class PostBase(BaseModel):
         "from_attributes": True
     }
 
-# Modelo para criar um novo post
 class PostCreate(PostBase):
     pass
 
-# Modelo para retornar dados do post pela API
+
 class PostOut(PostBase):
     id: Optional[PyObjectId] = Field(None, alias="_id")
 
@@ -46,7 +45,7 @@ class PostOut(PostBase):
         "from_attributes": True
     }
 
-# Modelo para respostas com paginação de posts
+
 class PaginatedPostResponse(BaseModel):
     total: int
     skip: int

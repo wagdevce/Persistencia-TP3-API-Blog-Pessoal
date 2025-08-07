@@ -1,4 +1,3 @@
-# app/routers/utils.py
 
 from bson import ObjectId
 from bson.errors import InvalidId

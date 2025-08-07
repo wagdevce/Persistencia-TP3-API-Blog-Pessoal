@@ -7,9 +7,9 @@ from pydantic import BaseModel, Field
 
 from app.models.PyObjectId import PyObjectId
 
-# Modelo base do Comentário
+
 class CommentBase(BaseModel):
-    post_id: str  # ID do post ao qual o comentário pertence
+    post_id: str  
     user_id: str 
     content: str
     creation_date: datetime = Field(default_factory=datetime.now)
@@ -17,11 +17,11 @@ class CommentBase(BaseModel):
 class CommentUpdate(BaseModel):
     content: Optional[str] = None
 
-# Modelo para criar um novo comentário
+
 class CommentCreate(CommentBase):
     pass
 
-# Modelo para retornar dados do comentário pela API
+
 class CommentOut(CommentBase):
     id: Optional[PyObjectId] = Field(None, alias="_id")
 
@@ -31,7 +31,7 @@ class CommentOut(CommentBase):
         "from_attributes": True
     }
 
-# Modelo para respostas com paginação de comentários
+
 class PaginatedCommentResponse(BaseModel):
     total: int
     skip: int

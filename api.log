@@ -27,3 +27,17 @@
 2025-08-06 20:12:27,666 - WARNING - Categoria com o identificador 'count' não encontrada.
 2025-08-06 20:13:15,411 - WARNING - Categoria com o identificador 'count' não encontrada.
 2025-08-06 20:15:38,583 - INFO - Total de categorias: 5
+2025-08-06 21:17:29,089 - INFO - Usuário criado com sucesso: wag@gmail
+2025-08-06 21:18:04,667 - INFO - Usuário encontrado com o identificador 'jozinho22'.
+2025-08-06 21:18:22,771 - WARNING - ID inválido fornecido: jozinho22
+2025-08-06 21:19:06,022 - INFO - Usuário ID 6893f099e927c50cad198967 atualizado com sucesso.
+2025-08-06 21:19:22,009 - INFO - Usuário encontrado com o identificador 'jozinho222'.
+2025-08-06 21:19:26,144 - WARNING - Usuário com o identificador 'jozinho22' não encontrado.
+2025-08-06 21:20:12,363 - INFO - 20 posts encontrados
+2025-08-06 21:20:41,277 - INFO - 20 posts encontrados
+2025-08-06 21:21:56,244 - INFO - Like do usuário 6893f099e927c50cad198967 registrado com sucesso no post 6893ee4e77b892db329de6b5.
+2025-08-06 21:23:15,887 - INFO - 20 posts encontrados
+2025-08-06 21:23:20,858 - INFO - Detalhes completos do post 6893ee4e77b892db329de6b5 recuperados.
+2025-08-06 21:24:14,011 - INFO - 10 tags listadas com sucesso.
+2025-08-06 21:24:32,538 - INFO - Total de tags: 16
+2025-08-06 21:25:40,304 - INFO - Estatísticas geradas com sucesso: {'total_posts': 43, 'total_comments': 250, 'most_popular_category': {'post_count': 11, 'category_name': 'Música'}}

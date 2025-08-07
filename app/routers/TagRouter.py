@@ -4,10 +4,8 @@ from fastapi import APIRouter, HTTPException, Query, status
 from typing import List
 from bson import ObjectId
 
-#  modelos da camada de dados
 from app.models import TagOut, TagCreate, PaginatedTagResponse
 
-# coleções necessárias para a deleção em cascata
 from app.core.db import tag_collection, post_collection, post_tag_collection
 from ..logs.logger import logger
 from .utils import object_id
@@ -22,7 +20,6 @@ async def create_tag(tag: TagCreate):
     """
     logger.debug(f"Tentando criar tag: {tag}")
     try:
-        # Verifica se já existe uma tag com o mesmo nome (case-insensitive)
         existing_tag = await tag_collection.find_one({"name": {"$regex": f"^{tag.name}$", "$options": "i"}})
         if existing_tag:
             raise HTTPException(status_code=409, detail="Uma tag com este nome já existe.")
@@ -114,20 +111,17 @@ async def delete_tag(tag_id: str):
     try:
         oid = object_id(tag_id)
         
-        # Deleta a tag da coleção de tags
         result_delete = await tag_collection.delete_one({"_id": oid})
         
         if result_delete.deleted_count == 0:
             logger.warning(f"Tag com ID {tag_id} não encontrada para deleção.")
             raise HTTPException(status_code=404, detail="Tag não encontrada")
 
-        # Remove a referência da tag de todos os posts que a continham
         update_result = await post_collection.update_many(
             {"tags_id": tag_id},
             {"$pull": {"tags_id": tag_id}}
         )
         
-        # Remove as associações da coleção PostTag
         assoc_delete_result = await post_tag_collection.delete_many({"tag_id": tag_id})
 
         logger.info(f"Tag ID {tag_id} deletada. {update_result.modified_count} posts atualizados. {assoc_delete_result.deleted_count} associações removidas.")
