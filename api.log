@@ -41,3 +41,13 @@
 2025-08-06 21:24:14,011 - INFO - 10 tags listadas com sucesso.
 2025-08-06 21:24:32,538 - INFO - Total de tags: 16
 2025-08-06 21:25:40,304 - INFO - Estatísticas geradas com sucesso: {'total_posts': 43, 'total_comments': 250, 'most_popular_category': {'post_count': 11, 'category_name': 'Música'}}
+2025-08-06 21:52:53,221 - INFO - Usuário criado com sucesso: string@gmail.com
+2025-08-06 21:53:39,162 - INFO - Usuário encontrado com o identificador 'lock'.
+2025-08-06 21:53:44,510 - INFO - Usuário encontrado com o identificador '6893f8e5e045f9c3ff4a98da'.
+2025-08-06 21:54:16,914 - INFO - Usuário ID 6893f8e5e045f9c3ff4a98da atualizado com sucesso.
+2025-08-06 21:55:32,582 - INFO - 43 posts encontrados
+2025-08-06 21:56:26,973 - INFO - Detalhes completos do post 6893ee4e77b892db329de6b5 recuperados.
+2025-08-06 21:57:57,391 - INFO - 43 posts encontrados
+2025-08-06 21:58:02,251 - INFO - Like do usuário 6893f8e5e045f9c3ff4a98da registrado com sucesso no post 6893ee4e77b892db329de6b5.
+2025-08-06 21:58:08,063 - INFO - 43 posts encontrados
+2025-08-06 21:58:31,678 - INFO - Estatísticas geradas com sucesso: {'total_posts': 43, 'total_comments': 250, 'most_popular_category': {'post_count': 11, 'category_name': 'Música'}}
