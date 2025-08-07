@@ -1,4 +1,3 @@
-# app/routers/__init__.py
 
 from .CategoryRouter import router as CategoryRouter
 from .PostRouter import router as PostRouter

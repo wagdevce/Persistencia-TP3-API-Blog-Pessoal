@@ -1,4 +1,3 @@
-# app/models/__init__.py
 
 from .Category import CategoryBase, CategoryCreate, CategoryOut, PaginatedCategoryResponse
 from .Post import PostBase, PostCreate, PostOut, PaginatedPostResponse, AuthorProfile, PopularPostOut, PaginatedPopularPostResponse

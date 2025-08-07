@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from typing import List
 from bson import ObjectId
 
-# modelos e coleções
+
 from app.models import CommentOut, CommentCreate, CommentUpdate, PaginatedCommentResponse
 from ..core.db import comment_collection, post_collection, user_collection
 from ..logs.logger import logger
@@ -22,13 +22,12 @@ async def create_comment(comment: CommentCreate):
     """
     logger.debug("Criando um novo comentário")
     try:
-        # Valida se o post referenciado existe
+        
         post = await post_collection.find_one({"_id": object_id(comment.post_id)})
         if not post:
             logger.warning(f"Post com ID {comment.post_id} não encontrado.")
             raise HTTPException(status_code=404, detail="Post não encontrado para associar o comentário.")
-        
-        # Valida se o usuário referenciado existe
+
         user = await user_collection.find_one({"_id": object_id(comment.user_id)})
         if not user:
             logger.warning(f"Usuário com ID {comment.user_id} não encontrado.")

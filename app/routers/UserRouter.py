@@ -3,10 +3,9 @@ from fastapi import APIRouter, HTTPException, status, Query
 from typing import List
 from bson import ObjectId
 
-# Adicionamos 'comment_collection' para a lógica de deleção
 from ..core.db import user_collection, comment_collection
 from ..logs.logger import logger
-# Adicionamos o novo 'UserUpdate' e o 'object_id' de utils
+
 from ..models import UserCreate, UserOut, PaginatedUserResponse, UserUpdate
 from .utils import object_id
 
@@ -20,7 +19,7 @@ async def create_user(user: UserCreate):
     """
     logger.debug(f"Tentando criar usuário com email: {user.email}")
     
-    # Em um projeto real, a senha seria 'hasheada' aqui
+   
     user_dict = user.model_dump()
     
     existing_user = await user_collection.find_one({"$or": [{"email": user.email}, {"username": user.username}]})
@@ -49,7 +48,7 @@ async def list_users(skip: int = Query(0, ge=0), limit: int = Query(10, ge=1)):
     }
 
 
-# --- NOVO ENDPOINT ---
+
 @router.get("/{identifier}", response_model=UserOut)
 async def get_user(identifier: str):
     """
@@ -57,11 +56,11 @@ async def get_user(identifier: str):
     """
     logger.debug(f"Buscando usuário com o identificador: {identifier}")
     
-    # Verifica se o identificador é um ObjectId válido
+   
     if ObjectId.is_valid(identifier):
         query = {"_id": ObjectId(identifier)}
     else:
-        # Se não for um ID, busca por username (exato e case-insensitive)
+        
         query = {"username": {"$regex": f"^{identifier}$", "$options": "i"}}
 
     user = await user_collection.find_one(query)
@@ -73,7 +72,7 @@ async def get_user(identifier: str):
     logger.warning(f"Usuário com o identificador '{identifier}' não encontrado.")
     raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-# --- NOVO ENDPOINT ---
+
 @router.put("/{user_id}", response_model=UserOut)
 async def update_user(user_id: str, user_update: UserUpdate):
     """
@@ -84,9 +83,8 @@ async def update_user(user_id: str, user_update: UserUpdate):
     if not update_data:
         raise HTTPException(status_code=400, detail="Nenhum dado fornecido para atualização.")
     
-    # Lógica para hashear a senha se ela for atualizada
+    
     if "password" in update_data:
-        # Em um projeto real, a senha seria hasheada aqui
         pass 
     
     updated_user = await user_collection.find_one_and_update(
@@ -102,19 +100,17 @@ async def update_user(user_id: str, user_update: UserUpdate):
     raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
 
-# --- NOVO ENDPOINT ---
+
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(user_id: str):
     """
     Deleta um usuário e todos os seus comentários.
     """
-    # Deleta o usuário
     delete_result = await user_collection.delete_one({"_id": object_id(user_id)})
     
     if delete_result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
         
-    # Deleta os comentários associados a este usuário
     comments_deleted = await comment_collection.delete_many({"user_id": user_id})
     
     logger.info(f"Usuário ID {user_id} e {comments_deleted.deleted_count} comentários associados foram deletados.")
