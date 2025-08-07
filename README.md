@@ -12,6 +12,7 @@ Uma API RESTful completa para um sistema de gerenciamento de conteúdo (Blog), d
 ### 📚 Índice
 
 - [✨ Sobre o Projeto](#-sobre-o-projeto)
+- [🎥 Demonstração em Vídeo](#-demonstração-em-vídeo)
 - [🚀 Principais Funcionalidades](#-principais-funcionalidades)
 - [🛠️ Tecnologias Utilizadas](#️-tecnologias-utilizadas)
 - [⛓️ Modelagem e Relacionamentos](#️-modelagem-e-relacionamentos)
@@ -23,6 +24,14 @@ Uma API RESTful completa para um sistema de gerenciamento de conteúdo (Blog), d
 ### ✨ Sobre o Projeto
 
 Este projeto implementa um backend robusto para um sistema de Blog. A API gerencia posts, categorias, tags, comentários e usuários, incluindo funcionalidades avançadas como um sistema de likes, filtros complexos, paginação, e um dashboard de estatísticas, tudo construído com foco em performance e boas práticas de desenvolvimento.
+
+---
+
+### 🎥 Demonstração em Vídeo
+
+Assista a uma demonstração completa da API em funcionamento, cobrindo a criação de entidades, as consultas avançadas e a interação entre os endpoints.
+
+[![Demonstração da API de Blog](https://img.youtube.com/vi/alr87_tMOrc/0.jpg)](https://youtu.be/alr87_tMOrc)
 
 ---
 
@@ -124,4 +133,4 @@ Siga os passos abaixo para executar o projeto localmente.
     ```
 
 7.  **Acesse a documentação interativa**:
-    Abra seu navegador e acesse `http://1227.0.0.1:8000/docs`.
+    Abra seu navegador e acesse `http://127.0.0.1:8000/docs`.
